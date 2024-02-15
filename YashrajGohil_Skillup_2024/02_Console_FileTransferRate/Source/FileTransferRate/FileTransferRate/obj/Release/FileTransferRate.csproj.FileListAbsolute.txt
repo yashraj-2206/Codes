@@ -1,0 +1,7 @@
+C:\Projects\Skillup\GIT\YashrajGohil_Skillup_2024\02_Console_FileTransferRate\Source\FileTransferRate\FileTransferRate\obj\Release\FileTransferRate.csproj.AssemblyReference.cache
+C:\Projects\Skillup\GIT\YashrajGohil_Skillup_2024\02_Console_FileTransferRate\Source\FileTransferRate\FileTransferRate\obj\Release\FileTransferRate.csproj.CoreCompileInputs.cache
+C:\Projects\Skillup\GIT\YashrajGohil_Skillup_2024\02_Console_FileTransferRate\Source\FileTransferRate\FileTransferRate\bin\Release\FileTransferRate.exe.config
+C:\Projects\Skillup\GIT\YashrajGohil_Skillup_2024\02_Console_FileTransferRate\Source\FileTransferRate\FileTransferRate\bin\Release\FileTransferRate.exe
+C:\Projects\Skillup\GIT\YashrajGohil_Skillup_2024\02_Console_FileTransferRate\Source\FileTransferRate\FileTransferRate\bin\Release\FileTransferRate.pdb
+C:\Projects\Skillup\GIT\YashrajGohil_Skillup_2024\02_Console_FileTransferRate\Source\FileTransferRate\FileTransferRate\obj\Release\FileTransferRate.exe
+C:\Projects\Skillup\GIT\YashrajGohil_Skillup_2024\02_Console_FileTransferRate\Source\FileTransferRate\FileTransferRate\obj\Release\FileTransferRate.pdb

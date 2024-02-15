@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Devices>
+	<Dev SrNo="ABCD1234WXYX0001">
+		<Address>192.168.121.100</Address>
+		<DevName>Bizub c224i</DevName>
+		<ModelName>Poseidon</ModelName>
+		<Type></Type>
+		<CommSetting>
+			<PortNo>161</PortNo>
+			<UseSSL>false</UseSSL>
+			<Password>DDG90009#$%#$</Password>
+		</CommSetting>
+	</Dev>
+	
+	<Dev SrNo="ABCD1234WXYX0002" >
+		<Address>192.168.121.00</Address>
+		<DevName>samsung</DevName>
+		<ModelName>Red Cherry 8400</ModelName>
+		<Type>A4</Type>
+		<CommSetting>
+			<PortNo>160</PortNo>
+			<UseSSL>false</UseSSL>
+		</CommSetting>
+	</Dev>
+	
+	<Dev SrNo="ABCD1234WXYX0099" >
+		<Address>192.168.121.300</Address>
+		<DevName>HP</DevName>
+		<ModelName>a2341</ModelName>
+		<Type>A3</Type>
+		<CommSetting>
+			<PortNo>235</PortNo>
+			<UseSSL>true</UseSSL>
+			<Password>DYBSXJ@^#%</Password>
+		</CommSetting>
+	</Dev>
+</Devices>

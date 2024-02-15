@@ -1,0 +1,14 @@
+C:\Users\SD-KS-2024-1\source\repos\PrinterStatus\PrinterStatus\bin\Debug\PrinterStatus.exe.config
+C:\Users\SD-KS-2024-1\source\repos\PrinterStatus\PrinterStatus\bin\Debug\PrinterStatus.exe
+C:\Users\SD-KS-2024-1\source\repos\PrinterStatus\PrinterStatus\bin\Debug\PrinterStatus.pdb
+C:\Users\SD-KS-2024-1\source\repos\PrinterStatus\PrinterStatus\obj\Debug\PrinterStatus.csproj.AssemblyReference.cache
+C:\Users\SD-KS-2024-1\source\repos\PrinterStatus\PrinterStatus\obj\Debug\PrinterStatus.csproj.CoreCompileInputs.cache
+C:\Users\SD-KS-2024-1\source\repos\PrinterStatus\PrinterStatus\obj\Debug\PrinterStatus.exe
+C:\Users\SD-KS-2024-1\source\repos\PrinterStatus\PrinterStatus\obj\Debug\PrinterStatus.pdb
+C:\Projects\Skillup\GIT\YashrajGohil_Skillup_2024\01_Console_PrinterStatus\Source\PrinterStatus\PrinterStatus\bin\Debug\PrinterStatus.exe.config
+C:\Projects\Skillup\GIT\YashrajGohil_Skillup_2024\01_Console_PrinterStatus\Source\PrinterStatus\PrinterStatus\bin\Debug\PrinterStatus.exe
+C:\Projects\Skillup\GIT\YashrajGohil_Skillup_2024\01_Console_PrinterStatus\Source\PrinterStatus\PrinterStatus\bin\Debug\PrinterStatus.pdb
+C:\Projects\Skillup\GIT\YashrajGohil_Skillup_2024\01_Console_PrinterStatus\Source\PrinterStatus\PrinterStatus\obj\Debug\PrinterStatus.csproj.AssemblyReference.cache
+C:\Projects\Skillup\GIT\YashrajGohil_Skillup_2024\01_Console_PrinterStatus\Source\PrinterStatus\PrinterStatus\obj\Debug\PrinterStatus.csproj.CoreCompileInputs.cache
+C:\Projects\Skillup\GIT\YashrajGohil_Skillup_2024\01_Console_PrinterStatus\Source\PrinterStatus\PrinterStatus\obj\Debug\PrinterStatus.exe
+C:\Projects\Skillup\GIT\YashrajGohil_Skillup_2024\01_Console_PrinterStatus\Source\PrinterStatus\PrinterStatus\obj\Debug\PrinterStatus.pdb
