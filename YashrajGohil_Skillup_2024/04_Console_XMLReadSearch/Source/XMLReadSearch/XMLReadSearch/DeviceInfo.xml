@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Devices>
-	<Dev SrNo="ABCD1234WXYX0001">
+	<Dev SrNo="ABCD1234WXYX0001" >
 		<Address>192.168.121.100</Address>
 		<DevName>Bizub c224i</DevName>
 		<ModelName>Poseidon</ModelName>
-		<Type></Type>
+		<Type>A3</Type>
 		<CommSetting>
 			<PortNo>161</PortNo>
 			<UseSSL>false</UseSSL>
@@ -12,14 +12,16 @@
 		</CommSetting>
 	</Dev>
 	
-	<Dev SrNo="ABCD1234WXYX0002" >
-		<Address>192.168.121.00</Address>
+	<Dev SrNo="ABCD1234WXY0002" >
+		<Address>192.168.A21.200</Address>
 		<DevName>samsung</DevName>
 		<ModelName>Red Cherry 8400</ModelName>
 		<Type>A4</Type>
 		<CommSetting>
 			<PortNo>160</PortNo>
 			<UseSSL>false</UseSSL>
+			<Password>DDG90009#$%#$</Password>
+
 		</CommSetting>
 	</Dev>
 	

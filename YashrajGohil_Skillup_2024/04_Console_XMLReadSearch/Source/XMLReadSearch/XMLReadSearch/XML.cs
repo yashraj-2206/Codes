@@ -13,6 +13,7 @@ using System.ComponentModel;
 using System.Threading;
 using System.Text.RegularExpressions;
 using System.Reflection;
+using System.Security.Cryptography;
 
 namespace XMLReadSearch
 {
@@ -56,18 +57,21 @@ namespace XMLReadSearch
 
 
 
-            int count = 1;
+            int count = 0;
             Dictionary<string, string> currentDevElements = null;
             Dictionary<int, Dictionary<string, string>> xmlData = new Dictionary<int, Dictionary<string, string>>();
+
+            XmlDocument xdoc = new XmlDocument();
+            xdoc.Load(Constants.XML_FILE_PATH);
+            XmlNodeList nodeList = xdoc.SelectNodes("//Devices/Dev");
+            XmlNode devnode = nodeList[0];
 
             XmlReaderSettings deviceSettings = new XmlReaderSettings();
             deviceSettings.ValidationType = ValidationType.Schema;
             deviceSettings.Schemas.Add(null, Constants.XSD_FILE_PATH);
-            deviceSettings.ValidationEventHandler += (sender, e) => deviceSettingsValidationEventhandler(sender, e, count, currentDevElements);
+            deviceSettings.ValidationEventHandler += (sender, e) => deviceSettingsValidationEventhandler(sender, e, count, devnode);
 
             XmlReader device = XmlReader.Create(xmlPath, deviceSettings);
-
-
 
             while (device.Read())
             {
@@ -77,27 +81,27 @@ namespace XMLReadSearch
                     currentDevElements = new Dictionary<string, string>();
                     do
                     {
-                        Console.WriteLine(device.Value);
 
                         if (device.HasAttributes)
                         {
-                            if (device.MoveToFirstAttribute())
-                            {
-                                do
-                                {
-                                    currentDevElements.Add(device.Name, device.Value);
-                                } while (device.MoveToNextAttribute());
+                            device.MoveToFirstAttribute();
 
-                            }
+                            do
+                            {
+                                currentDevElements.Add(device.Name, device.Value);
+                            } while (device.MoveToNextAttribute() && device.Name != "index");
+
+
                         }
                         if (device.NodeType == XmlNodeType.Element && device.Name != "CommSetting")
                         {
                             currentDevElements[device.Name] = device.ReadElementContentAsString();
                         }
-                        if (device.NodeType == XmlNodeType.EndElement && device.Name == "Dev")
+                        else if (device.NodeType == XmlNodeType.EndElement && device.Name == "Dev")
                         {
                             xmlData.Add(count, currentDevElements);
                             count++;
+                            devnode = nodeList[count];
                             break;
                         }
 
@@ -114,140 +118,281 @@ namespace XMLReadSearch
             return xmlData;
         }
 
-        public static void deviceSettingsValidationEventhandler(object sender, ValidationEventArgs e, int index, Dictionary<string, string> deviceData)
+        public static void deviceSettingsValidationEventhandler(object sender, ValidationEventArgs e, int index, XmlNode devnode)
         {
             Console.WriteLine($"{e.Message}");
             string errorMessage = e.Message;
-            XmlReader read = (XmlReader)sender;
-            Console.WriteLine(read.NamespaceURI);
+            XmlReader reader = (XmlReader)sender;
+            /*            XmlDocument xdoc = new XmlDocument();
+                        xdoc.Load(Constants.XML_FILE_PATH);
+                        XmlNodeList nodeList = xdoc.SelectNodes("//Devices/Dev");
+                        XmlNode devnode = nodeList[index];*/
+            Console.WriteLine(devnode.Name);
+            XmlNode currentNode = null;
+            Console.WriteLine($"Device index: {index + 1}");
 
-            XmlDocument xdoc = new XmlDocument();
-            xdoc.Load(Constants.XML_FILE_PATH);
-            XmlNode devnode = xdoc.SelectSingleNode($"//Dev[@index={index}]");
-       
-
-            Console.WriteLine($"Device index: {index}");
-            Console.Write("Serial Number:  ");
-
+            // Serial Number
+            string strSrNoTag = "Serial Number:  ";
             if (errorMessage.Contains("SrNo"))
             {
-                if (e.Message.Contains("missing"))
+                if (devnode.Attributes["SrNo"] == null)
                 {
-                    Console.WriteLine("(not present)");
+                    Console.WriteLine($"{strSrNoTag}(not present)");
                 }
                 else
                 {
                     XmlAttribute attr = devnode.Attributes["SrNo"];
+                    string strValueOfDevName = attr.InnerText;
 
-                    if (string.IsNullOrWhiteSpace(attr.Value))
+                    if (string.IsNullOrWhiteSpace(attr.InnerText))
                     {
-                        Console.WriteLine("Empty");
+                        Console.WriteLine($"{strSrNoTag}Empty");
+                    }
+                    else if (errorMessage.Contains("duplicate"))
+                    {
+                        Console.WriteLine($"{strSrNoTag}{strValueOfDevName}(duplicate)");
                     }
                     else if (errorMessage.Contains("Pattern constraint failed"))
                     {
-                        Console.WriteLine($"{attr.Value}(Not supported charecters)");
+                        Console.WriteLine($"{strSrNoTag}{strValueOfDevName}(Not supported charecters)");
                     }
-                    else if (attr.Value.Length != 16)
+                    else if (attr.InnerText.Length != 16)
                     {
-                        Console.WriteLine($"{attr.Value}(invalid length)");
+                        Console.WriteLine($"{strSrNoTag}{strValueOfDevName}(invalid length)");
                     }
                     else
                     {
-                        Console.WriteLine("(empty)");
+                        Console.WriteLine();
                     }
                 }
+
             }
             else
             {
-                Console.WriteLine(devnode.Attributes["SrNo"].Value);
+                Console.WriteLine($"{strSrNoTag}{devnode.Attributes["SrNo"].InnerText}");
             }
 
-            Console.Write("IP Address:     ");
-            if (errorMessage.Contains("Address"))
-            {
+            // IP Adress
+            string strIPTag = "IP Address:";
 
-                if (e.Message.Contains("missing"))
+            if (errorMessage.Contains("invalid child element 'Address'"))
+            {
+                Console.WriteLine();
+            }
+            else if (devnode.SelectSingleNode("Address") == null)
+            {
+                Console.WriteLine($"{strIPTag}(not present)");
+            }
+            else
+            {
+                currentNode = devnode.SelectSingleNode("Address");
+                string strValueOfIP = currentNode.InnerText;
+
+                if (string.IsNullOrWhiteSpace(currentNode.InnerText))
                 {
-                    Console.WriteLine("(not present)");
+                    Console.WriteLine($"{strIPTag}{strValueOfIP}Empty");
+                }
+                else if (errorMessage.Contains("duplicate"))
+                {
+                    Console.WriteLine($"{strIPTag}{strValueOfIP}(duplicate)");
+                }
+                else if (!Regex.IsMatch(currentNode.InnerText, "[0-9]*[.]*"))
+                {
+                    Console.WriteLine($"{strIPTag}{strValueOfIP}(Not supported characters)");
+                }
+                else if (currentNode.InnerText.Length >= 15 && currentNode.InnerText.Length <= 1)
+                {
+                    Console.WriteLine($"{strIPTag}{strValueOfIP}(invalid length)");
+                }
+                else if (!Regex.IsMatch(currentNode.InnerText, "[\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b]"))
+                {
+                    Console.WriteLine($"{strIPTag}{strValueOfIP}(Not supported format)");
                 }
                 else
                 {
-                    XmlNode ipNode = devnode.SelectSingleNode("Address");
-
-                    if (string.IsNullOrWhiteSpace(ipNode.Value))
-                    {
-                        Console.WriteLine("Empty");
-                    }
-                    else if (Regex.IsMatch(ipNode.Value, "[\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b]"))
-                    {
-                        Console.WriteLine($"{ipNode.Value}(Not supported charecters)");
-                    }
-                    else if (1 <= ipNode.Value.Length && ipNode.Value.Length <= 15)
-                    {
-                        Console.WriteLine($"{ipNode.Value}(invalid length)");
-                    }
+                    Console.WriteLine($"{strIPTag}{strValueOfIP}");
                 }
+
+
+            }
+
+            // deviceName
+            string strDevNameTag = "Device Name:     ";
+            if (errorMessage.Contains("invalid child element 'DevName'"))
+            {
+                Console.WriteLine();
+            }
+            else if (devnode.SelectSingleNode("DevName") == null)
+            {
+                Console.WriteLine("(not present)");
             }
             else
             {
-                Console.WriteLine(devnode.SelectSingleNode("Address").Value);
-            }
+                currentNode = devnode.SelectSingleNode("DevName");
+                string strValueOfDevName = currentNode.InnerText;
 
-
-
-
-
-
-
-
-
-
-
-            XmlReader device = (XmlReader)sender;
-            Console.WriteLine(device.ReadContentAsString());
-            Console.WriteLine($"Device index: {index}");
-            foreach (string s in deviceData.Keys)
-            {
-                if (s != device.Name)
+                if (Regex.IsMatch(strValueOfDevName, "[^\x00-\x7F]"))
                 {
-                    Console.WriteLine($"{s}:    {deviceData[s]}");
+                    Console.WriteLine($"{strDevNameTag}{strValueOfDevName}(Not supported charecters)");
                 }
-
+                else if (currentNode.InnerText.Length >= 24 && currentNode.InnerText.Length <= 0)
+                {
+                    Console.WriteLine($"{strDevNameTag}{strValueOfDevName}(invalid length)");
+                }
+                else
+                {
+                    Console.WriteLine($"{strDevNameTag}{strValueOfDevName}");
+                }
             }
 
+            // Model Name
+            string strModelNameTag = "Model Name:     ";
 
+            if (errorMessage.Contains("invalid child element 'ModelName'"))
+            {
+                Console.WriteLine();
+            }
+            else
+            {
+                currentNode = devnode.SelectSingleNode("ModelName");
+                string strValueOfModelName = currentNode.InnerText;
 
+                if (!Regex.IsMatch(strValueOfModelName, "[^\x00-\x7F]"))
+                {
+                    Console.WriteLine($"{strModelNameTag}{strValueOfModelName}(Not supported charecters)");
+                }
+                else if (currentNode.InnerText.Length >= 24 && currentNode.InnerText.Length <= 0)
+                {
+                    Console.WriteLine($"{strModelNameTag}{strValueOfModelName}(invalid length)");
+                }
+                else
+                {
+                    Console.WriteLine($"{strModelNameTag}{strValueOfModelName}");
+                }
+            }
 
+            //Type
+            List<string> deviceTypes = new List<string> { "A3", "A4" };
+            string strTypeTag = "Type:     ";
 
+            if (errorMessage.Contains("invalid child element 'Type'"))
+            {
+                Console.WriteLine();
+            }
+            else if (devnode.SelectSingleNode("Type") == null)
+            {
+                Console.WriteLine("(not present)");
+            }
+            else
+            {
+                currentNode = devnode.SelectSingleNode("Type");
+                string strValueOfType = currentNode.InnerText;
+                if (strValueOfType == null)
+                {
+                    Console.WriteLine($"{strSrNoTag}Empty");
+                }
+                if (!deviceTypes.Contains(strValueOfType))
+                {
+                    Console.WriteLine($"{strTypeTag}{strValueOfType}(Not supported charecters)");
+                }
+                else
+                {
+                    Console.WriteLine($"{strTypeTag}{strValueOfType}");
+                }
+            }
 
+            devnode = devnode.SelectSingleNode("CommSetting");
+            // PortNumber
+            string strPortNumberTag = "Port Number:     ";
+            if (errorMessage.Contains("invalid child element 'PortNO'"))
+            {
+                Console.WriteLine();
+            }
+            else if (devnode.SelectSingleNode("PortNo") == null)
+            {
+                Console.WriteLine($"{strPortNumberTag}(not present)");
+            }
+            else
+            {
+                currentNode = devnode.SelectSingleNode("PortNo");
+                string strValueOfPortNumber = currentNode.InnerText;
 
+                if (string.IsNullOrWhiteSpace(currentNode.InnerText))
+                {
+                    Console.WriteLine($"{strPortNumberTag}{strValueOfPortNumber}Empty");
+                }
+                else if (int.TryParse(strValueOfPortNumber, out int PortNo) && 1 <= PortNo && PortNo <= 65535)
+                {
+                    Console.WriteLine($"{strPortNumberTag}{strValueOfPortNumber}(Not supported format)");
+                }
+                else
+                {
+                    Console.WriteLine(strPortNumberTag, strValueOfPortNumber);
+                }
+            }
 
+            // UseSSL
+            string strUseSSLTag = "UseSSL:     ";
+            if (errorMessage.Contains("invalid child element 'UseSSL'"))
+            {
+                Console.WriteLine();
+            }
+            else if (devnode.SelectSingleNode("UseSSL") == null)
+            {
+                Console.WriteLine($"{strUseSSLTag}(not present)");
+            }
+            else
+            {
+                currentNode = devnode.SelectSingleNode("UseSSL");
+                string strValueOfUseSSL = currentNode.InnerText;
 
+                if (string.IsNullOrWhiteSpace(currentNode.InnerText))
+                {
+                    Console.WriteLine($"{strUseSSLTag}{strValueOfUseSSL}Empty");
+                }
+                else if (!bool.TryParse(strValueOfUseSSL, out bool PortNo))
+                {
+                    Console.WriteLine($"{strUseSSLTag}{strValueOfUseSSL}(Not supported format)");
+                }
+                else
+                {
+                    Console.WriteLine(strUseSSLTag, strValueOfUseSSL);
+                }
+            }
 
+            // Password
+            string strPasswordTag = "Password:     ";
+            if (errorMessage.Contains("invalid child element 'Password'"))
+            {
+                Console.WriteLine();
+            }
+            else if (devnode.SelectSingleNode("Password") == null)
+            {
+                Console.WriteLine($"{strPasswordTag}(not present)");
+            }
+            else
+            {
+                currentNode = devnode.SelectSingleNode("Password");
+                string strValueOfPassword = currentNode.InnerText;
 
+                if (Regex.IsMatch(strValueOfPassword, "[^\x00-\x7F]"))
+                {
+                    Console.WriteLine($"{strPasswordTag}{strValueOfPassword}(Not supported charecters)");
+                }
+                else if (currentNode.InnerText.Length >= 64 && currentNode.InnerText.Length <= 0)
+                {
+                    Console.WriteLine($"{strPasswordTag}{strValueOfPassword}(invalid length)");
+                }
+                else
+                {
+                    Console.WriteLine($"{strPasswordTag}{strValueOfPassword}");
+                }
+            }
 
-
-
-
-
-
-
-            /* foreach(XmlNode childnode in devnode) 
-             {
-                 Console.WriteLine($"{childnode.Name}: {childnode.ge}");
-                 if (childnode.Attributes != null)
-                 {
-                     foreach (XmlAttribute attr in childnode.Attributes)
-                     {
-                         Console.WriteLine($"Attribute: {attr.Name} = {attr.Value}");
-                     }
-                 }
-             } 
-
-
- */
-
+            Console.ReadLine();
         }
 
     }
+
 }
+
