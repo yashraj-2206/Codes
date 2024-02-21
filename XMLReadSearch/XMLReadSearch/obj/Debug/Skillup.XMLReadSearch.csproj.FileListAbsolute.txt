@@ -1,0 +1,7 @@
+C:\Users\yashr\OneDrive\Desktop\XMLReadSearch\XMLReadSearch\bin\Debug\XMLReadSearch.exe.config
+C:\Users\yashr\OneDrive\Desktop\XMLReadSearch\XMLReadSearch\bin\Debug\XMLReadSearch.exe
+C:\Users\yashr\OneDrive\Desktop\XMLReadSearch\XMLReadSearch\bin\Debug\XMLReadSearch.pdb
+C:\Users\yashr\OneDrive\Desktop\XMLReadSearch\XMLReadSearch\obj\Debug\Skillup.XMLReadSearch.csproj.AssemblyReference.cache
+C:\Users\yashr\OneDrive\Desktop\XMLReadSearch\XMLReadSearch\obj\Debug\Skillup.XMLReadSearch.csproj.CoreCompileInputs.cache
+C:\Users\yashr\OneDrive\Desktop\XMLReadSearch\XMLReadSearch\obj\Debug\XMLReadSearch.exe
+C:\Users\yashr\OneDrive\Desktop\XMLReadSearch\XMLReadSearch\obj\Debug\XMLReadSearch.pdb
