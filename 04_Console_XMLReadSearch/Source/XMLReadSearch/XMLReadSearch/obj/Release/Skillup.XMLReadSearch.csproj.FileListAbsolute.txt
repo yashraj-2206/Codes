@@ -1,0 +1,7 @@
+C:\Projects\Skillup\GIT\YashrajGohil_Skillup_2024\04_Console_XMLReadSearch\Source\XMLReadSearch\XMLReadSearch\obj\Release\Skillup.XMLReadSearch.csproj.AssemblyReference.cache
+C:\Projects\Skillup\GIT\YashrajGohil_Skillup_2024\04_Console_XMLReadSearch\Source\XMLReadSearch\XMLReadSearch\obj\Release\Skillup.XMLReadSearch.csproj.CoreCompileInputs.cache
+C:\Projects\Skillup\GIT\YashrajGohil_Skillup_2024\04_Console_XMLReadSearch\Source\XMLReadSearch\XMLReadSearch\obj\Release\XMLReadSearch.exe
+C:\Projects\Skillup\GIT\YashrajGohil_Skillup_2024\04_Console_XMLReadSearch\Source\XMLReadSearch\XMLReadSearch\obj\Release\XMLReadSearch.pdb
+C:\Projects\Skillup\GIT\YashrajGohil_Skillup_2024\04_Console_XMLReadSearch\Source\XMLReadSearch\XMLReadSearch\bin\Release\XMLReadSearch.exe.config
+C:\Projects\Skillup\GIT\YashrajGohil_Skillup_2024\04_Console_XMLReadSearch\Source\XMLReadSearch\XMLReadSearch\bin\Release\XMLReadSearch.exe
+C:\Projects\Skillup\GIT\YashrajGohil_Skillup_2024\04_Console_XMLReadSearch\Source\XMLReadSearch\XMLReadSearch\bin\Release\XMLReadSearch.pdb
