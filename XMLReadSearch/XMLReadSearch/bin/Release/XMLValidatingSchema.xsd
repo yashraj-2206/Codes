@@ -28,7 +28,7 @@
 										<xs:minLength value="0"/>
 										<xs:maxLength value="24"/>
 									</xs:restriction>
-								
+								</xs:simpleType>
 							</xs:element>
 
 							<xs:element name="ModelName" minOccurs="0" maxOccurs="1">

@@ -1,16 +1,21 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Skillup.XMLReadSearch
 {
+    /// <summary>
+    /// Represents an exception that occurs during command-line processing.
+    /// </summary>
     public class CommandLineException : Exception
     {
-        public CommandLineException(string message,int errorCode)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CommandLineException"/> class with the specified error message and error code.
+        /// </summary>
+        /// <param name="message">The error message that explains the reason for the exception.</param>
+        /// <param name="errorCode">The error code associated with the exception.</param>
+        public CommandLineException(string message, int errorCode)
         {
             Console.WriteLine($"{message} ({errorCode})");
         }
     }
+
 }

@@ -6,33 +6,117 @@
 		<ModelName>Poseidon</ModelName>
 		<Type>A3</Type>
 		<CommSetting>
-			<PortNo>161</PortNo>
-			<UseSSL>false</UseSSL>
+			<PortNo></PortNo>
+			<UseSSL>true</UseSSL>
 			<Password>GOiz7WWJNevg1YLVtdiA4A==</Password>
 		</CommSetting>
 	</Dev>
 	
 	<Dev SrNo="ABCD1234WXYX0002" >
-		<Address>192.168.121100</Address>
+		<Address>192.168.1.10</Address>
 		<DevName>ramsang</DevName>
 		<ModelName>Red Cherry 8400</ModelName>
 		<Type>A4</Type>
 		<CommSetting>
 			<PortNo>12422</PortNo>
 			<UseSSL>false</UseSSL>
-			<Password>GOiz7WWJNevg1YLVtdiA4A==</Password>
+			<Password>6PWxB/4D6z4tBkkWkZhRKQ==</Password>
 		</CommSetting>
 	</Dev>
 	
-	<Dev SrNo="ABCD1234WXYX0099" >
+	<Dev SrNo="ABCD1234WXYX0003" >
 		<Address>192.168.11.10</Address>
 		<DevName>HP</DevName>
 		<ModelName>a2341</ModelName>
 		<Type>A3</Type>
 		<CommSetting>
-			<PortNo>455</PortNo>
+			<PortNo>65535</PortNo>
 			<UseSSL>true</UseSSL>
-			<Password>GOiz7WWJNevg1YLVtdiA4A==</Password>
+			<Password>AHfsMfrpAzjBNk2KNQ1TCA==</Password>
+		</CommSetting>
+	</Dev>
+	
+	<Dev SrNo="ABCD1234WXYX0004" >
+		<Address>255.168.255.255</Address>
+		<DevName>DeviceX1</DevName>
+		<ModelName>Fold54</ModelName>
+		<Type>A3</Type>
+		<CommSetting>
+			<PortNo>43565</PortNo>
+			<UseSSL>false</UseSSL>
+			<Password>OvpVS5BU4FIKCI+c0kuU3A==</Password>
+		</CommSetting>
+	</Dev>
+
+	<Dev SrNo="ABCD1234WXYX0005" >
+		<Address>192.168.121.1</Address>
+		<DevName>MegaControl-5000</DevName>
+		<ModelName>Node-0005</ModelName>
+		<Type>A4</Type>
+		<CommSetting>
+			<PortNo>07</PortNo>
+			<UseSSL>false</UseSSL>
+			<Password>8oaM8xNAK/UwgQ72YUEgcQ==</Password>
+		</CommSetting>
+	</Dev>
+
+	<Dev SrNo="ABCD1234WXYX0006" >
+		<Address>192.168.14.100</Address>
+		<DevName>NexusPad</DevName>
+		<ModelName>N7</ModelName>
+		<Type>A4</Type>
+		<CommSetting>
+			<PortNo>43</PortNo>
+			<UseSSL>true</UseSSL>
+			<Password>HfAEiO1vEJUtPOdayHaEig==</Password>
+		</CommSetting>
+	</Dev>
+
+	<Dev SrNo="ABCD1234WXYX0007" >
+		<Address>192.168.121.200</Address>
+		<DevName>SpectraTab</DevName>
+		<ModelName>S4000</ModelName>
+		<Type>A3</Type>
+		<CommSetting>
+			<PortNo>3678</PortNo>
+			<UseSSL>false</UseSSL>
+			<Password>dw/ueeUcHgKiHq/6om1Zwg==</Password>
+		</CommSetting>
+	</Dev>
+
+	<Dev SrNo="ABCD1234WXYX0008" >
+		<Address>192.168.21.100</Address>
+		<DevName>Galaxy</DevName>
+		<ModelName>Neon29</ModelName>
+		<Type>A4</Type>
+		<CommSetting>
+			<PortNo>543</PortNo>
+			<UseSSL>true</UseSSL>
+			<Password>HfAEiO1vEJUtPOdayHaEig==</Password>
+		</CommSetting>
+	</Dev>
+
+	<Dev SrNo="ABCD1234WXYX0009" >
+		<Address>192.168.161.100</Address>
+		<DevName>LuminaWatch</DevName>
+		<ModelName>Lw12</ModelName>
+		<Type>A3</Type>
+		<CommSetting>
+			<PortNo>89</PortNo>
+			<UseSSL>false</UseSSL>
+			<Password>j+4Nh3EeyaKKneqxV8zjCg==</Password>
+		</CommSetting>
+	</Dev>
+
+	<Dev SrNo="ABCD1234WXYX0010" >
+		<Address>192.168.183.100</Address>
+		<DevName>QuantumBridge2K</DevName>
+		<ModelName>lumirion</ModelName>
+		<Type>A3</Type>
+		<CommSetting>
+			<PortNo>35</PortNo>
+			<UseSSL>false</UseSSL>
+			<Password>CrsSrMGhWCenq7/Nxv7BMA==</Password>
 		</CommSetting>
 	</Dev>
 </Devices>

@@ -13,7 +13,6 @@
         {
             Demo demo = new Demo();
             demo.Run(args);
-           
         }
     }
 }
