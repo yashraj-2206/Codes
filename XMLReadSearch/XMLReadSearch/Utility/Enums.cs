@@ -41,29 +41,4 @@
         A4
     }
 
-    /// <summary>
-    /// Elements in xml file
-    /// </summary>
-    public enum XmlTagNames
-    {
-        Devices,
-        Dev,
-        Address,
-        DevName,
-        ModelName,
-        Type,
-        CommSetting,
-        PortNo,
-        UseSSL,
-        Password
-    }
-
-    /// <summary>
-    /// Attributes in xml file
-    /// </summary>
-    public enum XmlAttributeNames
-    {
-        SrNo
-    }
-
 }

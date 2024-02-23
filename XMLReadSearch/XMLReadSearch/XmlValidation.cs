@@ -6,6 +6,8 @@ using System.Xml.Schema;
 using System.Xml.Linq;
 using System.Text.RegularExpressions;
 using System;
+using System.Diagnostics.SymbolStore;
+using System.Net;
 
 
 namespace Skillup.XMLReadSearch
@@ -56,7 +58,7 @@ namespace Skillup.XMLReadSearch
         /// <param name="xmlPath"> Path given in the command line </param>
         /// <returns> Dictionary containing data of the error device </returns>
         /// <exception cref="XmlReaderException"> Exception of invalid format of xml file </exception>
-        public Dictionary<string, string> IsValidXML(string xmlPath)
+        public Dictionary<string, string> ValidateXml(string xmlPath)
         {
             try
             {
@@ -76,17 +78,15 @@ namespace Skillup.XMLReadSearch
                 XDocument xDoc = XDocument.Load(xmlPath);
 
                 // Checking if there are devices or not
-                if (xDoc.Descendants(XmlTagNames.Dev.ToString()).Count() == 0)
+                if (xDoc.Descendants(Constants.XML_TAG_NAME_FOR_DEV).Count() == 0)
                 {
                     throw new XmlReaderException(Constants.EMPTY_FILE_ERROR_MESSAGE, (int)XmlFileExceptionCode.NoDevicePresent);
                 }
 
-                string xsdPath = @"C:\Projects\Skillup\GIT\YashrajGohil_Skillup_2024\04_Console_XMLReadSearch\Work\XMLValidatingSchema.xsd";
-                //string xsdPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "XMLValidatingSchema.xsd");
+                string xsdPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $"{Constants.XSD_NAME}");
 
                 XmlSchemaSet schemaSet = new XmlSchemaSet();
                 schemaSet.Add("", xsdPath);
-
 
                 XmlDocument xmlDoc = new XmlDocument();
                 xmlDoc.Load(xmlPath);
@@ -103,45 +103,7 @@ namespace Skillup.XMLReadSearch
                     // Validates the device
                     xmlDoc.Validate(ValidationCallback, node);
 
-                   
-                    XmlAttribute srno = node.Attributes[XmlAttributeNames.SrNo.ToString()];
-                    if (srno != null)
-                    {
-                        string serialNumber = srno.InnerText;
-
-                        // Checks if the Serial Number is Duplicate
-                        if (listOfSrNo.Contains(serialNumber))
-                        {
-                            isDuplicateSrNo = true;
-                            isCorrectXmlData = false;
-                        }
-                        else
-                        {
-                            listOfSrNo.Add(serialNumber);
-                        }
-                    }
-
-
-                    XmlNode ip = node.SelectSingleNode(XmlTagNames.Address.ToString());
-
-                    if (ip != null)
-                    {
-                        string ipAddress = ip.InnerText;
-
-                        // Checks if the IP Address is Duplicate
-                        if (listOfIP.Contains(ipAddress))
-                        {
-                            isDuplicateIP = true;
-                            isCorrectXmlData = false;
-                        }
-                        else
-                        {
-                            listOfIP.Add(ipAddress);
-                        }
-                    }
-
-
-                    if (!isCorrectXmlData)
+                    if (!isCorrectXmlData || IsSrNoDuplicate(listOfSrNo) || IsIpAddressDuplicate(listOfIP))
                     {
                         SetErrorMessages();
                         return errorDeviceInfo;
@@ -157,6 +119,22 @@ namespace Skillup.XMLReadSearch
             {
                 throw new XmlReaderException(Constants.FILE_FORMAT_ERROR_MESSAGE, (int)XmlFileExceptionCode.InvalidFile);
             }
+            catch (XmlReaderException e)
+            {
+                throw e;
+            }
+            catch (UnauthorizedAccessException e)
+            {
+                throw new XmlReaderException($"Error: File access denied \nDetail Error: {e.Message}", e.Message);
+            }
+            catch (XmlSchemaException e)
+            {
+                throw new XmlReaderException("Error: Invalid xsd file", e.Message);
+            }
+            catch (Exception e)
+            {
+                throw new XmlReaderException("Error: Unknown error occured", e.Message);
+            }
         }
 
         /// <summary>
@@ -170,20 +148,58 @@ namespace Skillup.XMLReadSearch
             isCorrectXmlData = false;
         }
 
+        public bool IsSrNoDuplicate(List<string> listOfSrNo)
+        {
+            XmlAttribute srno = errorDeviceNode.Attributes[Constants.XML_DEV_ATTRIBUTE_NAME_FOR_SR_NO];
+            string serialNumber = srno.InnerText;
+
+            // Checks if the Serial Number is Duplicate
+            if (listOfSrNo.Contains(serialNumber))
+            {
+                isDuplicateSrNo = true;
+                return true;
+            }
+            else
+            {
+                listOfSrNo.Add(serialNumber);
+                return false;
+            }
+        }
+
+        public bool IsIpAddressDuplicate(List<string> listOfIP)
+        {
+            XmlNode ip = errorDeviceNode.SelectSingleNode(Constants.XML_TAG_NAME_FOR_IP_ADDRESS);
+
+            string ipAddress = ip.InnerText;
+
+            // Checks if the IP Address is Duplicate
+            if (listOfIP.Contains(ipAddress))
+            {
+                isDuplicateIP = true;
+                return true;
+            }
+            else
+            {
+                listOfIP.Add(ipAddress);
+                return false;
+            }
+        }
+
         /// <summary>
         /// Sets the error messages to display in the device having error
         /// </summary>
         public void SetErrorMessages()
         {
+            Console.WriteLine(errorMessage);
             errorDeviceInfo.Add("Device Index", errorDeviceIndex.ToString());
-            errorDeviceInfo.Add("SerialNumber:", GetSerialNumberErrorMessage(errorMessage));
-            errorDeviceInfo.Add("IP Address:", GetIPAddressErrorMessage(errorMessage));
-            errorDeviceInfo.Add("Device Name:", GetDevNameErrorMessage(errorMessage));
-            errorDeviceInfo.Add("ModelName:", GetModelNameErrorMessage(errorMessage));
-            errorDeviceInfo.Add("Type:", GetTypeErrorMessage(errorMessage));
-            errorDeviceInfo.Add("Port No:", GetPortNoErrorMessage(errorMessage));
-            errorDeviceInfo.Add("UseSSL:", GetUseSSLErrorMessage(errorMessage));
-            errorDeviceInfo.Add("Password:", GetPasswordErrorMessage(errorMessage));
+            errorDeviceInfo.Add("SerialNumber:", GetSerialNumberErrorMessage());
+            errorDeviceInfo.Add("IP Address:", GetIPAddressErrorMessage());
+            errorDeviceInfo.Add("Device Name:", GetDevNameErrorMessage());
+            errorDeviceInfo.Add("ModelName:", GetModelNameErrorMessage());
+            errorDeviceInfo.Add("Type:", GetTypeErrorMessage());
+            errorDeviceInfo.Add("Port No:", GetPortNoErrorMessage());
+            errorDeviceInfo.Add("UseSSL:", GetUseSSLErrorMessage());
+            errorDeviceInfo.Add("Password:", GetPasswordErrorMessage());
         }
 
         /// <summary>
@@ -191,294 +207,304 @@ namespace Skillup.XMLReadSearch
         /// </summary>
         /// <param name="errorMessage"> Error message occured while validating node </param>
         /// <returns> Message to be printed </returns>
-        public string GetSerialNumberErrorMessage(string errorMessage)
+        public string GetSerialNumberErrorMessage()
         {
-            XmlAttribute attr = errorDeviceNode.Attributes[XmlAttributeNames.SrNo.ToString()];
+            XmlAttribute attr = errorDeviceNode.Attributes[Constants.XML_DEV_ATTRIBUTE_NAME_FOR_SR_NO];
 
             if (attr == null)
             {
                 return Constants.NOT_PRESENT_MESSAGE;
             }
-            else
-            {
-                string valueOfSerialNumber = attr.InnerText;
 
-                if (string.IsNullOrWhiteSpace(attr.InnerText))
-                {
-                    return Constants.EMPTY_MESSAGE;
-                }
-                else if (isDuplicateSrNo)
-                {
-                    return $"{valueOfSerialNumber}{Constants.DUPLICATE_MESSAGE}";
-                }
-                else if (!Regex.IsMatch(valueOfSerialNumber, Constants.PATTERN_FOR_SERIAL_NUMBER))
-                {
-                    return $"{valueOfSerialNumber}{Constants.INVALID_CHARACTER_MESSAGE}";
-                }
-                else if (attr.InnerText.Length != Constants.SERIAL_NUMBER_LENGTH)
-                {
-                    return $"{valueOfSerialNumber}{Constants.LENGTH_MISMATCH_MESSAGE}";
-                }
-                else
-                {   
-                    return $"{attr.Value}";
-                }
+            string valueOfSerialNumber = attr.InnerText;
+
+
+            if (string.IsNullOrWhiteSpace(attr.InnerText))
+            {
+                return Constants.EMPTY_MESSAGE;
             }
+
+            if (isDuplicateSrNo)
+            {
+                return $"{valueOfSerialNumber}{Constants.DUPLICATE_MESSAGE}";
+            }
+
+            if (!Regex.IsMatch(valueOfSerialNumber, Constants.PATTERN_FOR_SERIAL_NUMBER))
+            {
+                return $"{valueOfSerialNumber}{Constants.INVALID_CHARACTER_MESSAGE}";
+            }
+
+            if (attr.InnerText.Length != Constants.SERIAL_NUMBER_LENGTH)
+            {
+                return $"{valueOfSerialNumber}{Constants.LENGTH_MISMATCH_MESSAGE}";
+            }
+
+            return $"{attr.InnerText}";
+
+
         }
 
         /// <summary>
         /// Validating IP Address
         /// </summary>
-        /// <param name="errorMessage"> Error message occured while validating node </param>
         /// <returns> Message to be printed </returns>
-        public string GetIPAddressErrorMessage(string errorMessage)
+        public string GetIPAddressErrorMessage()
         {
-            XmlNode currentNode = errorDeviceNode.SelectSingleNode(XmlTagNames.Address.ToString());
+            XmlNode currentNode = errorDeviceNode.SelectSingleNode(Constants.XML_TAG_NAME_FOR_IP_ADDRESS);
+
             if (currentNode == null)
             {
                 return Constants.NOT_PRESENT_MESSAGE;
             }
-            else if (errorMessage.Contains(Constants.INVALID_ADDRESS_ELEMENT))
+
+            if ((errorDeviceNode.SelectNodes($"{Constants.XML_TAG_NAME_FOR_IP_ADDRESS}").Count + errorDeviceNode.SelectNodes($"{Constants.XML_TAG_NAME_FOR_COMMSETTING}/{Constants.XML_TAG_NAME_FOR_IP_ADDRESS}").Count) != 1)
             {
                 return Constants.DUPLICATE_TAG_MESSAGE;
             }
+
+            string strValueOfIP = currentNode.InnerText;
+
+            if (string.IsNullOrWhiteSpace(currentNode.InnerText))
+            {
+                return Constants.EMPTY_MESSAGE;
+            }
+
+            if (isDuplicateIP)
+            {
+                return $"{strValueOfIP}{Constants.DUPLICATE_MESSAGE}";
+            }
+
+            if (!Regex.IsMatch(currentNode.InnerText, Constants.CHARACTER_PATTERN_FOR_IP_ADDRESS))
+            {
+                return $"{strValueOfIP}{Constants.INVALID_CHARACTER_MESSAGE}";
+            }
+
+            if (currentNode.InnerText.Length > Constants.MAX_IP_ADDRESS_LENGTH || currentNode.InnerText.Length < Constants.MIN_IP_ADDRESS_LENGTH)
+            {
+                return $"{strValueOfIP}{Constants.LENGTH_MISMATCH_MESSAGE}";
+            }
+
+            //if (!Regex.IsMatch(currentNode.InnerText, Constants.FORMAT_PATTERN_FOR_IP_ADDRESS))
+            if (!IPAddress.TryParse(strValueOfIP, out _))
+            {
+                return $"{strValueOfIP}{Constants.FORMAT_ISSUE_MESSAGE}";
+            }
+
             else
             {
-                string strValueOfIP = currentNode.InnerText;
-
-                if (string.IsNullOrWhiteSpace(currentNode.InnerText))
-                {
-                    return Constants.EMPTY_MESSAGE;
-                }
-                else if (isDuplicateIP)
-                {
-                    return $"{strValueOfIP}{Constants.DUPLICATE_MESSAGE}";
-                }
-                else if (!Regex.IsMatch(currentNode.InnerText, Constants.CHARACTER_PATTERN_FOR_IP_ADDRESS))
-                {
-                    return $"{strValueOfIP}{Constants.INVALID_CHARACTER_MESSAGE}";
-                }
-                else if (currentNode.InnerText.Length > Constants.MAX_IP_ADDRESS_LENGTH || currentNode.InnerText.Length < Constants.MIN_IP_ADDRESS_LENGTH)
-                {
-                    return $"{strValueOfIP}{Constants.LENGTH_MISMATCH_MESSAGE}";
-                }
-                else if (!Regex.IsMatch(currentNode.InnerText, Constants.FORMAT_PATTERN_FOR_IP_ADDRESS))
-                {
-                    return $"{strValueOfIP}{Constants.FORMAT_ISSUE_MESSAGE}";
-                }
-                else
-                {
-                    return $"{strValueOfIP}";
-                }
+                return $"{strValueOfIP}";
             }
+
         }
 
         /// <summary>
         /// Validating Device Name
         /// </summary>
-        /// <param name="errorMessage"> Error message occured while validating node </param>
         /// <returns> Message to be printed </returns>
-        public string GetDevNameErrorMessage(string errorMessage)
+        public string GetDevNameErrorMessage()
         {
-            XmlNode currentNode = errorDeviceNode.SelectSingleNode(XmlTagNames.DevName.ToString());
-            if (errorMessage.Contains(Constants.INVALID_DEV_NAME_ELEMENT) && errorDeviceNode.SelectSingleNode(XmlTagNames.Address.ToString()) != null)
-            {
+            XmlNode currentNode = errorDeviceNode.SelectSingleNode(Constants.XML_TAG_NAME_FOR_DEVICE_NAME);
 
+            if (currentNode == null)
+            {
+                return Constants.NOT_PRESENT_MESSAGE;
+            }
+
+            if ((errorDeviceNode.SelectNodes($"{Constants.XML_TAG_NAME_FOR_DEVICE_NAME}").Count + errorDeviceNode.SelectNodes($"{Constants.XML_TAG_NAME_FOR_COMMSETTING}/{Constants.XML_TAG_NAME_FOR_DEVICE_NAME}").Count) != 1)
+            {
                 return Constants.DUPLICATE_TAG_MESSAGE;
+            }
+
+            if (currentNode.InnerText == null)
+            {
+                return "Empty";
+            }
+
+            string strValueOfDevName = currentNode.InnerText;
+
+            if (currentNode.InnerText.Length > Constants.MAX_DEVICE_NAME_LENGTH || currentNode.InnerText.Length < Constants.MIN_DEVICE_NAME_LENGTH)
+            {
+                return $"{strValueOfDevName}{Constants.LENGTH_MISMATCH_MESSAGE}";
             }
             else
             {
-                if (currentNode == null)
-                {
-
-                    return Constants.NOT_PRESENT_MESSAGE;
-                }
-                else
-                {
-                    string strValueOfDevName = currentNode.InnerText;
-
-                    if (currentNode.InnerText.Length > Constants.MAX_DEVICE_NAME_LENGTH || currentNode.InnerText.Length < Constants.MIN_DEVICE_NAME_LENGTH)
-                    {
-                        return $"{strValueOfDevName}{Constants.LENGTH_MISMATCH_MESSAGE}";
-                    }
-                    else
-                    {
-                        return $"{strValueOfDevName}";
-                    }
-                }
+                return $"{strValueOfDevName}";
             }
+
+
         }
 
         /// <summary>
         /// Validating Model Name
         /// </summary>
-        /// <param name="errorMessage"> Error message occured while validating node </param>
         /// <returns> Message to be printed </returns>
-        public string GetModelNameErrorMessage(string errorMessage)
+        public string GetModelNameErrorMessage()
         {
-            XmlNode currentNode = errorDeviceNode.SelectSingleNode(XmlTagNames.ModelName.ToString());
+            XmlNode currentNode = errorDeviceNode.SelectSingleNode(Constants.XML_TAG_NAME_FOR_MODEL_NAME);
 
             if (currentNode == null)
             {
                 return string.Empty;
             }
 
-            string strValueOfModelName = currentNode.InnerText;
-
-            if (errorMessage.Contains(Constants.INVALID_MODEL_NAME_ELEMENT) && errorDeviceNode.SelectSingleNode(XmlTagNames.DevName.ToString()) != null)
+            if ((errorDeviceNode.SelectNodes($"{Constants.XML_TAG_NAME_FOR_MODEL_NAME}").Count + errorDeviceNode.SelectNodes($"{Constants.XML_TAG_NAME_FOR_COMMSETTING}/{Constants.XML_TAG_NAME_FOR_MODEL_NAME}").Count) != 1)
             {
                 return Constants.DUPLICATE_TAG_MESSAGE;
             }
-            else if (currentNode.InnerText.Length > Constants.MAX_MODEL_NAME_LENGTH || currentNode.InnerText.Length < Constants.MIN_MODEL_NAME_LENGTH)
+
+            string strValueOfModelName = currentNode.InnerText;
+            if (currentNode.InnerText.Length > Constants.MAX_MODEL_NAME_LENGTH || currentNode.InnerText.Length < Constants.MIN_MODEL_NAME_LENGTH)
             {
                 return $"{strValueOfModelName}{Constants.LENGTH_MISMATCH_MESSAGE}";
             }
-            else
-            {
-                return $"{strValueOfModelName}";
-            }
+
+            return $"{strValueOfModelName}";
+
+
         }
 
         /// <summary>
         /// Validating Type
         /// </summary>
-        /// <param name="errorMessage"> Error message occured while validating node </param>
         /// <returns> Message to be printed </returns>
-        public string GetTypeErrorMessage(string errorMessage)
+        public string GetTypeErrorMessage()
         {
 
-            XmlNode currentNode = errorDeviceNode.SelectSingleNode(XmlTagNames.Type.ToString());
+            XmlNode currentNode = errorDeviceNode.SelectSingleNode(Constants.XML_TAG_NAME_FOR_TYPE);
 
-            if (errorMessage.Contains(Constants.INVALID_TYPE_ELEMENT))
-            {
-                return Constants.DUPLICATE_TAG_MESSAGE;
-            }
-            else if (currentNode == null)
+            if (currentNode == null)
             {
                 return Constants.NOT_PRESENT_MESSAGE;
             }
-            else
+
+            if ((errorDeviceNode.SelectNodes($"{Constants.XML_TAG_NAME_FOR_TYPE}").Count + errorDeviceNode.SelectNodes($"{Constants.XML_TAG_NAME_FOR_COMMSETTING}/{Constants.XML_TAG_NAME_FOR_TYPE}").Count) != 1)
             {
-                string strValueOfType = currentNode.InnerText;
-
-                if (strValueOfType == string.Empty)
-                {
-                    return Constants.EMPTY_MESSAGE;
-                }
-                else if (Enum.TryParse<DeviceTypes>(strValueOfType, out _))
-                {
-                    return $"{strValueOfType}{Constants.INVALID_CHARACTER_MESSAGE}";
-                }
-                else
-                {
-                    return $"{strValueOfType}";
-                }
-
+                return Constants.DUPLICATE_TAG_MESSAGE;
             }
+
+            string strValueOfType = currentNode.InnerText;
+
+            if (strValueOfType == string.Empty)
+            {
+                return Constants.EMPTY_MESSAGE;
+            }
+
+            if (!Enum.TryParse<DeviceTypes>(strValueOfType, out _))
+            {
+                return $"{strValueOfType}{Constants.INVALID_CHARACTER_MESSAGE}";
+            }
+
+            return $"{strValueOfType}";
         }
 
         /// <summary>
         /// Validating Port No
         /// </summary>
-        /// <param name="errorMessage"> Error message occured while validating node </param>
         /// <returns> Message to be printed </returns>
-        public string GetPortNoErrorMessage(string errorMessage)
+        public string GetPortNoErrorMessage()
         {
 
-            XmlNode currentNode = errorDeviceNode.SelectSingleNode(XmlTagNames.CommSetting.ToString()).SelectSingleNode(XmlTagNames.PortNo.ToString());
+            XmlNode currentNode = errorDeviceNode.SelectSingleNode(Constants.XML_TAG_NAME_FOR_COMMSETTING).SelectSingleNode(Constants.XML_TAG_NAME_FOR_PORT_NO);
 
-            if (errorMessage.Contains(Constants.INVALID_PORT_NUMBER_ELEMENT) && errorDeviceNode.SelectSingleNode(XmlTagNames.Type.ToString()) != null)
-            {
-                return Constants.DUPLICATE_TAG_MESSAGE;
-            }
-            else if (currentNode == null)
+            if (currentNode == null)
             {
                 return Constants.NOT_PRESENT_MESSAGE;
             }
-            else
-            {
-                string strValueOfPortNumber = currentNode.InnerText;
 
-                if (string.IsNullOrWhiteSpace(currentNode.InnerText))
-                {
-                    return $"{strValueOfPortNumber}{Constants.EMPTY_MESSAGE}";
-                }
-                else if (!(int.TryParse(strValueOfPortNumber, out int portNo) && (Constants.MIN_PORT_NUMBER_VALUE <= portNo && portNo <= Constants.MAX_PORT_NUMBER_VALUE)))
-                {
-                    return $"{strValueOfPortNumber}{Constants.FORMAT_ISSUE_MESSAGE}";
-                }
-                else
-                {
-                    return $"{strValueOfPortNumber}";
-                }
+            if ((errorDeviceNode.SelectNodes($"{Constants.XML_TAG_NAME_FOR_COMMSETTING}/{Constants.XML_TAG_NAME_FOR_PORT_NO}").Count + errorDeviceNode.SelectNodes($"{Constants.XML_TAG_NAME_FOR_PORT_NO}").Count) != 1)
+            {
+                return Constants.DUPLICATE_TAG_MESSAGE;
             }
+
+
+            string strValueOfPortNumber = currentNode.InnerText;
+
+            if (string.IsNullOrWhiteSpace(currentNode.InnerText))
+            {
+                return $"{strValueOfPortNumber}{Constants.EMPTY_MESSAGE}";
+            }
+
+            if (!(int.TryParse(strValueOfPortNumber, out int portNo) && (Constants.MIN_PORT_NUMBER_VALUE <= portNo && portNo <= Constants.MAX_PORT_NUMBER_VALUE)))
+            {
+                return $"{strValueOfPortNumber}{Constants.FORMAT_ISSUE_MESSAGE}";
+            }
+
+            return $"{strValueOfPortNumber}";
         }
 
         /// <summary>
         /// Validating UseSSL
         /// </summary>
-        /// <param name="errorMessage"> Error message occured while validating node </param>
         /// <returns> Message to be printed </returns>
-        public string GetUseSSLErrorMessage(string errorMessage)
+        public string GetUseSSLErrorMessage()
         {
-            XmlNode currentNode = errorDeviceNode.SelectSingleNode(XmlTagNames.CommSetting.ToString()).SelectSingleNode(XmlTagNames.UseSSL.ToString());
+            XmlNode currentNode = errorDeviceNode.SelectSingleNode(Constants.XML_TAG_NAME_FOR_COMMSETTING).SelectSingleNode(Constants.XML_TAG_NAME_FOR_USE_SSL);
 
-            if (errorMessage.Contains(Constants.INVALID_USE_SSL_ELEMENT) && errorDeviceNode.SelectSingleNode(XmlTagNames.CommSetting.ToString()).SelectSingleNode(XmlTagNames.Type.ToString()) != null)
-            {
-                return Constants.DUPLICATE_TAG_MESSAGE;
-            }
-            else if (currentNode == null)
+            if (currentNode == null)
             {
                 return Constants.NOT_PRESENT_MESSAGE;
             }
-            else
+
+            if (errorDeviceNode.SelectNodes($"{Constants.XML_TAG_NAME_FOR_COMMSETTING}/{Constants.XML_TAG_NAME_FOR_USE_SSL}").Count + errorDeviceNode.SelectNodes($"{Constants.XML_TAG_NAME_FOR_USE_SSL}").Count != 1)
             {
-                string strValueOfUseSSL = currentNode.InnerText.ToUpper();
-                if (string.IsNullOrWhiteSpace(currentNode.InnerText))
-                {
-                    return $"{strValueOfUseSSL}{Constants.EMPTY_MESSAGE}";
-                }
-                else if (!bool.TryParse(strValueOfUseSSL, out _))
-                {
-                    return $"{strValueOfUseSSL}{Constants.FORMAT_ISSUE_MESSAGE}";
-                }
-                else
-                {
-                    return $"{strValueOfUseSSL}";
-                }
+                return Constants.DUPLICATE_TAG_MESSAGE;
             }
+
+            string strValueOfUseSSL = currentNode.InnerText.ToUpper();
+
+            if (string.IsNullOrWhiteSpace(currentNode.InnerText))
+            {
+                return $"{strValueOfUseSSL}{Constants.EMPTY_MESSAGE}";
+            }
+
+            if (!bool.TryParse(strValueOfUseSSL, out _))
+            {
+                return $"{strValueOfUseSSL}{Constants.FORMAT_ISSUE_MESSAGE}";
+            }
+
+            return $"{strValueOfUseSSL}";
+
+
         }
 
         /// <summary>
         /// Validating Password
         /// </summary>
-        /// <param name="errorMessage"> Error message occured while validating node </param>
         /// <returns> Message to be printed </returns>
-        public string GetPasswordErrorMessage(string errorMessage)
+        public string GetPasswordErrorMessage()
         {
-            XmlNode currentNode = errorDeviceNode.SelectSingleNode(XmlTagNames.CommSetting.ToString()).SelectSingleNode(XmlTagNames.Password.ToString());
+            XmlNode currentNode = errorDeviceNode.SelectSingleNode(Constants.XML_TAG_NAME_FOR_COMMSETTING).SelectSingleNode(Constants.XML_TAG_NAME_FOR_PASSWORD);
 
-            if (errorMessage.Contains(Constants.INVALID_PASSWORD_ELEMENT) && errorDeviceNode.SelectSingleNode(XmlTagNames.CommSetting.ToString()).SelectSingleNode(XmlTagNames.UseSSL.ToString()) != null)
-            {
-                return Constants.DUPLICATE_TAG_MESSAGE;
-            }
-            else if (currentNode == null)
+            if (currentNode == null)
             {
                 return Constants.NOT_PRESENT_MESSAGE;
             }
-            else
-            {
-                string strValueOfPassword = currentNode.InnerText;
 
-                if (currentNode.InnerText.Length > Constants.MAX_PASSWORD_LENGTH)
-                {
-                    return $"{strValueOfPassword}{Constants.LENGTH_MISMATCH_MESSAGE}";
-                }
-                else
-                {
-                    return $"{strValueOfPassword}";
-                }
+            if ((errorDeviceNode.SelectNodes($"{Constants.XML_TAG_NAME_FOR_PASSWORD}").Count + errorDeviceNode.SelectNodes($"{Constants.XML_TAG_NAME_FOR_COMMSETTING}/{Constants.XML_TAG_NAME_FOR_PASSWORD}").Count) != 1)
+            {
+                return Constants.DUPLICATE_TAG_MESSAGE;
             }
+
+            string strValueOfPassword = currentNode.InnerText;
+
+            if (currentNode.InnerText.Length > Constants.MAX_PASSWORD_LENGTH)
+            {
+                return $"{strValueOfPassword}{Constants.LENGTH_MISMATCH_MESSAGE}";
+            }
+
+            return $"{strValueOfPassword}";
+        }
+
+        public void Validation()
+        {
+            
+        }
+        public bool IsNull(Object o)
+        {
+            if (o == null)
+                return false;
+            else
+                return true;
         }
     }
 }

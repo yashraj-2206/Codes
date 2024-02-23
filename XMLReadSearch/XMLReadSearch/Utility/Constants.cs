@@ -109,6 +109,16 @@ namespace Skillup.XMLReadSearch
         public const string FILE_FORMAT_ERROR_MESSAGE = "Error: File format error.Given file is not an XML file.";
 
         /// <summary>
+        /// Error message indicating invalid device information. Provides details for reference.
+        /// </summary>
+        public const string INVALID_DEVICE_ERROR_MESSAGE = "Error: Invalid device information. Please refer below details.";
+
+        /// <summary>
+        /// Error message indicating invalid input choice. Prompt to select from available options.
+        /// </summary>
+        public const string INVALID_CHOICE_ERROR_MESSAGE = "Error: Invalid input. Please select from above options.";
+
+        /// <summary>
         /// Regular expression pattern for validating serial numbers. It allows uppercase letters and digits.
         /// </summary>
         public const string PATTERN_FOR_SERIAL_NUMBER = @"^[A-Z0-9]+$";
@@ -121,7 +131,7 @@ namespace Skillup.XMLReadSearch
         /// <summary>
         /// Regular expression pattern for validating the format of an IP address.
         /// </summary>
-        public const string FORMAT_PATTERN_FOR_IP_ADDRESS = @"^\b([0-2]?[0-9]{0,2}\.){3}[0-2]?[0-9]{0,2}\b$";
+        public const string FORMAT_PATTERN_FOR_IP_ADDRESS = @"^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$";
 
         /// <summary>
         /// Error message indicating an invalid child element 'Address'.
@@ -157,6 +167,19 @@ namespace Skillup.XMLReadSearch
         /// Error message indicating an invalid child element 'Password'.
         /// </summary>
         public const string INVALID_PASSWORD_ELEMENT = "invalid child element 'Password'";
+
+        public const string XML_TAG_NAME_FOR_DEVICES = "Devices";
+        public const string XML_TAG_NAME_FOR_DEV = "Dev";
+        public const string XML_TAG_NAME_FOR_IP_ADDRESS = "Address";
+        public const string XML_TAG_NAME_FOR_DEVICE_NAME = "DevName";
+        public const string XML_TAG_NAME_FOR_MODEL_NAME = "ModelName";
+        public const string XML_TAG_NAME_FOR_TYPE = "Type";
+        public const string XML_TAG_NAME_FOR_COMMSETTING = "CommSetting";
+        public const string XML_TAG_NAME_FOR_PORT_NO = "PortNo";
+        public const string XML_TAG_NAME_FOR_USE_SSL = "UseSSL";
+        public const string XML_TAG_NAME_FOR_PASSWORD = "Password";
+        public const string XML_DEV_ATTRIBUTE_NAME_FOR_SR_NO = "SrNo";
+     
 
     }
 }

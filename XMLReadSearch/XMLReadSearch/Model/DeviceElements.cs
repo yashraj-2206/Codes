@@ -15,6 +15,7 @@ namespace Skillup.XMLReadSearch
         /// </summary>
         [XmlElement("Dev")]
         public List<Device> DeviceList { get; set; }
+
     }
 
     /// <summary>
